@@ -1,0 +1,5 @@
+package com.bridgelabz.addressbook.repository;
+
+public interface ContactRepository {
+
+}

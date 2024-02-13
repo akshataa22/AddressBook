@@ -1,0 +1,71 @@
+package com.bridgelabz.addressbook.service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bridgelabz.addressbook.exception.ContactAlreadyExistsException;
+import com.bridgelabz.addressbook.exception.ContactNotFoundException;
+import com.bridgelabz.addressbook.model.Contact;
+import com.bridgelabz.addressbook.repository.ContactRepository;
+import com.bridgelabz.addressbook.response.Response;
+
+@Service
+public class AddressBookService {
+	@Autowired
+	ContactRepository repository;
+	
+	public Response createContact(Contact contact){
+		Contact existingEmployee = repository.findByFirstNameAndLastName(contact.getFirstName(), contact.getLastName());
+	    if (existingEmployee != null) {
+	        throw new ContactAlreadyExistsException("Employee with name " + contact.getFirstName() + contact.getLastName() + " already exists.");
+	    }
+	    
+	    Contact time = new Contact();
+	    time.setCreatedDateAndTime(LocalDateTime.now());
+		repository.save(contact);
+		Response response = new Response();
+		response.setCode(200);
+		response.setMessage("Employee data Saved Sucessfully");
+		return response;
+	}
+	
+	public List<Contact> getAllContacts() {
+		List<Contact> contacts = new ArrayList<>();
+		repository.findAll().forEach(list -> contacts.add(list));;
+		return contacts;
+	}
+	
+	public Contact getContact(String id) {
+		Contact c = repository.findById(id).orElseThrow(() -> new ContactNotFoundException("Employee not found with id: " + id));
+		return c;
+	}
+	
+	public Contact updateContactDetails(String id, Contact contact) {
+		Contact c = repository.findById(id).orElseThrow(() -> new ContactNotFoundException("Employee not found with id: " + id));
+		Contact time = new Contact();
+	    time.setModifiedDateAndTime(LocalDateTime.now());
+		c.setFirstName(contact.getFirstName());
+		c.setLastName(contact.getLastName());
+		c.setAddress(contact.getAddress());
+		c.setPhoneNumber(contact.getPhoneNumber());
+		c.setEmail(contact.getEmail());
+		return repository.save(c);
+	}
+	
+	public void deleteAllContacts() {
+		repository.deleteAll();
+	}
+	
+	public void deleteById(String id) {
+		Optional<Contact> existingEmployee = repository.findById(id);
+		if (!existingEmployee.isPresent()) {
+            throw new ContactNotFoundException("Contact with ID " + id + " not found.");
+        }
+		repository.deleteById(id);
+	}
+}

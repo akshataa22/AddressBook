@@ -1,0 +1,31 @@
+package com.bridgelabz.addressbook.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bridgelabz.addressbook.model.Contact;
+import com.bridgelabz.addressbook.repository.ContactRepository;
+import com.bridgelabz.addressbook.response.Response;
+
+@Service
+public class AddressBookService {
+	@Autowired
+	ContactRepository repository;
+	
+	public Response createContact(Contact contact){
+		repository.save(contact);
+		Response response = new Response();
+		response.setCode(200);
+		response.setMessage("Employee data Saved Sucessfully");
+		return response;
+	}
+	
+	public List<Contact> getAllContacts() {
+		List<Contact> contacts = new ArrayList<>();
+		repository.findAll().forEach(list -> contacts.add(list));;
+		return contacts;
+	}
+}
